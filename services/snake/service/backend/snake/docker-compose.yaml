@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  srv:
+    build: ./
+    image: snake:0.0.1
+    ports:
+      - "7999:7999"
+    env_file: .env

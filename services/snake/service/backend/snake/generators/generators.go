@@ -1,4 +1,4 @@
-package main
+package generators
 
 import (
 	"encoding/binary"
@@ -14,6 +14,7 @@ const SizeofInt64 = 8
 const MaxSteps = 256
 const FoodCount = 8
 const LevelWidth, LevelHeight = 16, 16
+const FoodTTL = 2
 
 var InitialSnakeBody = []game.Coordinate{
 	{X: 0, Y: 1},
@@ -78,6 +79,7 @@ func GenerateLevel(seed []byte) (level *game.Level, err error) {
 		Field:    abstract.NewField[game.Cell](LevelWidth, LevelHeight),
 		Snake:    snake,
 		MaxSteps: MaxSteps,
+		FoodTTl:  FoodTTL,
 	}
 
 	level.FoodSteps = level.MaxSteps / FoodCount

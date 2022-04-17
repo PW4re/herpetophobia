@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const MAX_SNAKE_LENGTH = 1024
+const MaxSnakeLength = 1024
 
 type Snake struct {
 	body      *abstract.Deque[Coordinate]
@@ -21,17 +21,21 @@ func NewSnake(body []Coordinate, direction Direction) (snake *Snake, err error) 
 	}
 
 	snake = &Snake{
-		body:      abstract.NewDeque[Coordinate](MAX_SNAKE_LENGTH),
+		body:      abstract.NewDeque[Coordinate](MaxSnakeLength),
 		direction: direction,
 	}
 
 	for _, coordinate := range body {
-		snake.body.AppendRight(coordinate)
+		_ = snake.body.AppendRight(coordinate)
 	}
 
 	snake.tail, _ = snake.body.PeekLeft()
 
 	return
+}
+
+func (snake Snake) Direction() Direction {
+	return snake.direction
 }
 
 func (snake *Snake) Length() int64 {
@@ -65,7 +69,7 @@ func (snake *Snake) Move(direction Direction) error {
 	}
 
 	head = head.Move(snake.direction)
-	snake.body.AppendRight(head)
+	_ = snake.body.AppendRight(head)
 
 	snake.tail, err = snake.body.PopLeft()
 	if err != nil {
