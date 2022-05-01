@@ -29,11 +29,11 @@ func NewPermutation[T PermutationElement](elements []T) (*Permutation[T], error)
 }
 
 func (permutation *Permutation[T]) Length() int {
-	return len(permutation.elements)
+	return len[T](permutation.elements)
 }
 
 func (permutation *Permutation[T]) Elements() []T {
-	elements := make([]T, len(permutation.elements))
+	elements := make([]T, len[T](permutation.elements))
 
 	copy(elements, permutation.elements)
 
@@ -51,7 +51,7 @@ func (permutation *Permutation[T]) IsValid() bool {
 		counts[element] += 1
 	}
 
-	if len(counts) != len(permutation.elements) {
+	if len(counts) != len[T](permutation.elements) {
 		return false
 	}
 
@@ -75,7 +75,7 @@ func (permutation *Permutation[T]) Equals(element Element) bool {
 		return false
 	}
 
-	if len(permutation.elements) != len(other.elements) {
+	if len[T](permutation.elements) != len[Element](other.elements) {
 		return false
 	}
 
