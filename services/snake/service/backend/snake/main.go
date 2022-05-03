@@ -1,9 +1,9 @@
 package main
 
 import (
-	"snake/server"
+	"snake/http"
 )
 
 func main() {
-	server.Run()
+	http.StartServ()
 }
