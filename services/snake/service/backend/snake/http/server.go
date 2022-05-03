@@ -49,7 +49,7 @@ func play(w http.ResponseWriter, r *http.Request) {
 		errorResp(w, 500, err)
 	}
 	gameConn := NewGameConn(conn, 1)
-	go gameConn.startGame()
+	go gameConn.Play()
 }
 
 func errorResp(w http.ResponseWriter, code int, err error) {
@@ -65,5 +65,5 @@ func StartServ() {
 	http.HandleFunc("/", home)
 	http.HandleFunc("/create", create)
 	http.HandleFunc("/play", play)
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":8080", nil)
 }

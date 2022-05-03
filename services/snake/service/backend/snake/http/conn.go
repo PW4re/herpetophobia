@@ -16,6 +16,7 @@ type GameConn struct {
 	conn   *websocket.Conn
 	level  *game.Level
 	gameId int
+	perm   []int
 }
 
 type MoveMsg struct {
@@ -25,13 +26,15 @@ type MoveMsg struct {
 }
 
 type EndGameAnsw struct {
-	Permutation [256]int `json:"permutation"`
-	Counter     int      `json:"counter"`
-	GameResult  string   `json:"gameResult"`
-	Prize       string   `json:"prize"`
+	Permutation []int  `json:"permutation"`
+	Counter     int    `json:"counter"`
+	GameResult  string `json:"gameResult"`
+	Prize       string `json:"prize"`
 }
 
 type MoveAnsw struct {
+	GameMap [][]string `json:"gameMap"`
+	Steps   int64      `json:"step"`
 }
 
 type ErrAnsw struct {
@@ -43,34 +46,67 @@ func NewGameConn(conn *websocket.Conn, gameId int) GameConn {
 	return gameConn
 }
 
-func (gameConn *GameConn) startGame() {
-	//todo: получение игры из базы
-	seed, err := generators.GenerateSeed(Initial, Secret, Counter)
-	if err != nil {
-		gameConn.conn.WriteJSON(&ErrAnsw{msg: err.Error()})
-		return
-	}
-
-	level, err := generators.GenerateLevel(seed)
-	if err != nil {
-		gameConn.conn.WriteJSON(&ErrAnsw{msg: err.Error()})
-		return
-	}
-	gameConn.level = level
-	_ = gameConn.level.Step(game.DIRECTION_RIGHT)
+func (gameConn *GameConn) Play() {
+	defer gameConn.conn.Close()
 	for {
-		var gameMsg MoveMsg
-		err = gameConn.conn.ReadJSON(&gameMsg) //тут бы сделать ожидание сообщения
+		err := gameConn.setupGame()
 		if err != nil {
-			gameConn.conn.WriteJSON(&ErrAnsw{msg: err.Error()})
+			_ = gameConn.conn.WriteJSON(ErrAnsw{msg: err.Error()})
 			return
 		}
-		moveAnsw := gameConn.handleGame(gameMsg)
-		if gameConn.level.Status() != game.STATUS_UNFINISHED {
-			_ = gameConn.conn.WriteJSON(EndGameAnsw{})
+		_ = gameConn.conn.WriteJSON(MoveAnsw{GameMap: gameConn.level.Map(), Steps: gameConn.level.Steps()})
+
+		var moveMsg MoveMsg
+		for gameConn.level.Status() == game.STATUS_UNFINISHED {
+			err = gameConn.conn.ReadJSON(&moveMsg)
+			if err != nil {
+				_ = gameConn.conn.WriteJSON(ErrAnsw{msg: err.Error()})
+				return
+			}
+			moveAnsw := gameConn.handleGame(moveMsg)
+			_ = gameConn.conn.WriteJSON(moveAnsw)
+			if moveMsg.CloseGame {
+				return
+			}
 		}
-		_ = gameConn.conn.WriteJSON(moveAnsw)
+		gameConn.handleEndGame()
+		err = gameConn.conn.ReadJSON(&moveMsg)
+		if err != nil {
+			_ = gameConn.conn.WriteJSON(ErrAnsw{msg: err.Error()})
+			return
+		}
+		if !moveMsg.NewGame {
+			return
+		}
 	}
+}
+
+func (gameConn *GameConn) setupGame() error {
+	//todo: получение игры из базы
+	seed, err := generators.GenerateSeed(Initial, Secret, Counter)
+	perm := make([]int, 256)
+	for i, el := range seed {
+		perm[i] = int(el)
+	}
+	if err != nil {
+		return err
+	}
+	level, err := generators.GenerateLevel(seed)
+	if err != nil {
+		return err
+	}
+	gameConn.level = level
+	gameConn.perm = perm
+	_ = gameConn.level.Step(game.DIRECTION_RIGHT)
+	return nil
+}
+
+func (gameConn GameConn) handleEndGame() {
+	strStatus := "win"
+	if gameConn.level.Status() == game.STATUS_LOSE {
+		strStatus = "lose"
+	}
+	_ = gameConn.conn.WriteJSON(EndGameAnsw{Permutation: gameConn.perm, Counter: 0, GameResult: strStatus})
 }
 
 func (gameConn *GameConn) handleGame(msg MoveMsg) MoveAnsw {
@@ -86,11 +122,5 @@ func (gameConn *GameConn) handleGame(msg MoveMsg) MoveAnsw {
 		direction = game.DIRECTION_RIGHT
 	}
 	_ = gameConn.level.Step(direction)
-	if gameConn.level.Status() == game.STATUS_WIN {
-		return MoveAnsw{}
-	}
-	if gameConn.level.Status() == game.STATUS_LOSE {
-		return MoveAnsw{}
-	}
-	return MoveAnsw{}
+	return MoveAnsw{GameMap: gameConn.level.Map(), Steps: gameConn.level.Steps()}
 }
