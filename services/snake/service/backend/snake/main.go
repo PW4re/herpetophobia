@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"snake/db"
 	"snake/game"
 	"strings"
 )
@@ -52,6 +53,7 @@ func drawLevel(level *game.Level) {
 }
 
 func main() {
+	db.Migrate()
 	seed, err := GenerateSeed(Initial, Secret, Counter)
 	if err != nil {
 		fmt.Println(err)
