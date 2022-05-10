@@ -10,20 +10,15 @@ import (
 
 type disconnectFunc func(ctx context.Context)
 
-var client *mongo.Client
-
 func createClient() (*mongo.Client, disconnectFunc, error) {
-	var err error
-	f := func(ctx context.Context) {
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017")) // stubbed
+
+	return client, func(ctx context.Context) {
 		err = client.Disconnect(ctx)
 		if err != nil {
 			log.Println(err)
 		}
-	}
-	if client == nil {
-		client, err = mongo.NewClient(options.Client().ApplyURI("mongodb://root:root@mongo:27017/")) // stubbed // todo from env
-	}
-	return client, f, err
+	}, err
 }
 
 func connect(client *mongo.Client, er error) (ctx context.Context, cancel context.CancelFunc, err error) {
