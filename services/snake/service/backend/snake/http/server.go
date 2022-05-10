@@ -6,8 +6,6 @@ import (
 	"github.com/pkg/errors"
 	"log"
 	"net/http"
-	"snake/db"
-	"snake/objects"
 )
 
 type Map struct {
@@ -40,14 +38,11 @@ func create(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		log.Println(_map)
-		level := objects.Level{Id: 1, Secret: _map.Secret, Counter: 0, Init: _map.Init, Flag: _map.Flag}
-		_, err = db.InsertDoc("test", "test", level)
 		if err != nil {
 			log.Fatalln(err)
 		}
+		// сохранение карты в базу // todo сохранение в базу
 		log.Println("saved to db")
-		// сохранение карты в базу
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		resp := make(map[string]string)
@@ -59,7 +54,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 	errorResp(w, 405, errors.New("method not allowed"))
 }
 
+func gameList(w http.ResponseWriter, r *http.Request) {
+	//todo отдать все id игр либо как-то батчевать их
+}
+
 func play(w http.ResponseWriter, r *http.Request) {
+	//todo из тела запроса достать id игры
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		errorResp(w, 500, err)
@@ -80,6 +80,7 @@ func errorResp(w http.ResponseWriter, code int, err error) {
 func StartServ() {
 	http.HandleFunc("/", home)
 	http.HandleFunc("/create", create)
+	http.HandleFunc("/gameList", gameList)
 	http.HandleFunc("/play", play)
 	http.ListenAndServe(":8080", nil)
 }

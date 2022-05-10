@@ -1,9 +1,9 @@
 package objects
 
 type Level struct {
-	Id      int
-	Secret  string
-	Counter int
-	Init    [256]byte
-	Flag    string
+	Id      int       `bson:"id"`
+	Secret  string    `bson:"secret"`
+	Counter int       `bson:"counter"`
+	Init    [256]byte `bson:"init"`
+	Flag    string    `bson:"flag"`
 }

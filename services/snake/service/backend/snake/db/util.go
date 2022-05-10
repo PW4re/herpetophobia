@@ -11,7 +11,7 @@ import (
 type disconnectFunc func(ctx context.Context)
 
 func createClient() (*mongo.Client, disconnectFunc, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://admin:admin@mongo:27017/")) // stubbed
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://root:root@mongo:27017/")) // stubbed
 
 	return client, func(ctx context.Context) {
 		err = client.Disconnect(ctx)
