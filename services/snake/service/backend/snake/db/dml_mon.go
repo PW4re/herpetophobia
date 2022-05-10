@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -14,7 +13,7 @@ func Get(dbName string, collectionName string, f bson.M, opts ...*options.FindOn
 	defer cancel()
 	defer disconnect(ctx)
 
-	return client.Database(dbName).Collection(collectionName).FindOne(context.TODO(), f, opts...), err
+	return client.Database(dbName).Collection(collectionName).FindOne(ctx, f, opts...), err
 }
 
 func GetCollection(dbName string, collectionName string) (*mongo.Collection, error) {
