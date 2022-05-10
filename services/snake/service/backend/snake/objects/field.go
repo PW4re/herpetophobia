@@ -1,9 +1,9 @@
 package objects
 
 type Level struct {
-	id      int
-	secret  string
-	counter int
-	init    [256]byte
-	flag    string
+	Id      int
+	Secret  string
+	Counter int
+	Init    [256]byte
+	Flag    string
 }

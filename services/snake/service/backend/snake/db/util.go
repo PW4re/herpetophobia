@@ -21,7 +21,7 @@ func createClient() (*mongo.Client, disconnectFunc, error) {
 		}
 	}
 	if client == nil {
-		client, err = mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017")) // stubbed
+		client, err = mongo.NewClient(options.Client().ApplyURI("mongodb://root:root@mongo:27017/")) // stubbed // todo from env
 	}
 	return client, f, err
 }

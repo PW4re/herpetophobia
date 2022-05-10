@@ -9,9 +9,10 @@ import (
 
 func Migrate() {
 	//TODO: get from env
-	err := createCollection("local", "test")
+	err := createCollection("test", "test")
 	if err != nil {
 		_, ok := err.(mongo.CommandError)
+		log.Println(err.Error())
 		if ok {
 			log.Printf("Database '%s' and collection '%s' already exists", "local", "test")
 		} else {

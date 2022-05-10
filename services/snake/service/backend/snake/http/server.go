@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
+	"log"
 	"net/http"
+	"snake/db"
+	"snake/objects"
 )
 
 type Map struct {
@@ -23,7 +26,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.Method)
 	if r.Method == http.MethodPost {
+		log.Println("Handling create")
 		var _map Map
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&_map)
@@ -31,6 +36,17 @@ func create(w http.ResponseWriter, r *http.Request) {
 			errorResp(w, 500, err)
 			return
 		}
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+		log.Println(_map)
+		level := objects.Level{Id: 1, Secret: _map.Secret, Counter: 0, Init: _map.Init, Flag: _map.Flag}
+		_, err = db.InsertDoc("test", "test", level)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		log.Println("saved to db")
 		// сохранение карты в базу
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
