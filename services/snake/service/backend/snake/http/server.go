@@ -63,6 +63,7 @@ func play(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		errorResp(w, 500, err)
+		return
 	}
 	gameConn := NewGameConn(conn, 1)
 	go gameConn.Play()
