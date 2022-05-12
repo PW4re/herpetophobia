@@ -5,11 +5,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"os"
 )
+
+var DbName = os.Getenv("dbName")
+var ColName = os.Getenv("collectionName")
 
 func Migrate() {
 	//TODO: get from env
-	err := createCollection("test", "test")
+	err := createCollection(DbName, ColName)
 	if err != nil {
 		_, ok := err.(mongo.CommandError)
 		log.Println(err.Error())

@@ -16,7 +16,7 @@ func Get(dbName string, collectionName string, f bson.M, opts ...*options.FindOn
 	return client.Database(dbName).Collection(collectionName).FindOne(ctx, f, opts...), err
 }
 
-func GetCollection(dbName string, collectionName string) (*mongo.Collection, error) {
+func GetResList(dbName string, collectionName string, f bson.D, opts ...*options.FindOptions) ([]bson.D, error) {
 	client, disconnect, err := createClient()
 	ctx, cancel, err := connect(client, err)
 	if err != nil {
@@ -24,7 +24,10 @@ func GetCollection(dbName string, collectionName string) (*mongo.Collection, err
 	}
 	defer cancel()
 	defer disconnect(ctx)
-	return client.Database(dbName).Collection(collectionName), err
+	cur, err := client.Database(dbName).Collection(collectionName).Find(ctx, f, opts...)
+	var results []bson.D
+	err = cur.All(ctx, results)
+	return results, err
 }
 
 func UpdateDocs(dbName string, collectionName string,

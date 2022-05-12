@@ -6,12 +6,18 @@ import (
 	"github.com/pkg/errors"
 	"log"
 	"net/http"
+	"snake/dao"
+	"snake/objects"
 )
 
 type Map struct {
 	Secret string    `json:"secret"`
 	Init   [256]byte `json:"init"`
 	Flag   string    `json:"flag"`
+}
+
+type Ids struct {
+	Ids []int `json:"ids"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -41,7 +47,13 @@ func create(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		// сохранение карты в базу // todo сохранение в базу
+		dao.SaveMap(objects.Level{
+			Id:      0, //todo генерация id
+			Secret:  _map.Secret,
+			Counter: 0,
+			Init:    _map.Init,
+			Flag:    _map.Flag,
+		})
 		log.Println("saved to db")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
@@ -59,13 +71,25 @@ func gameList(w http.ResponseWriter, r *http.Request) {
 }
 
 func play(w http.ResponseWriter, r *http.Request) {
-	//todo из тела запроса достать id игры
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		errorResp(w, 500, err)
 	}
-	gameConn := NewGameConn(conn, 1)
-	go gameConn.Play()
+	msg := make(map[string]interface{})
+	_ = conn.ReadJSON(msg)
+	if msg["id"] != nil {
+		switch msg["id"].(type) {
+		case int:
+			gameConn := NewGameConn(conn, msg["id"].(int))
+			go gameConn.Play()
+		default:
+			errorResp(w, 401, errors.New("can't parse id"))
+			conn.Close()
+		}
+		return
+	}
+	errorResp(w, 401, errors.New("can't find id"))
+	conn.Close()
 }
 
 func errorResp(w http.ResponseWriter, code int, err error) {

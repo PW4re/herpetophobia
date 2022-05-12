@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gorilla/websocket"
+	"snake/dao"
 	"snake/game"
 	"snake/generators"
 )
@@ -13,10 +14,11 @@ var Secret = []byte("ababubazzz")
 var Counter = uint64(123)
 
 type GameConn struct {
-	conn   *websocket.Conn
-	level  *game.Level
-	gameId int
-	perm   []int
+	conn    *websocket.Conn
+	level   *game.Level
+	gameId  int
+	perm    []int
+	counter int
 }
 
 type MoveMsg struct {
@@ -82,8 +84,9 @@ func (gameConn *GameConn) Play() {
 }
 
 func (gameConn *GameConn) setupGame() error {
-	//todo: получение игры из базы
-	seed, err := generators.GenerateSeed(Initial, Secret, Counter)
+	_map := dao.GetMap(gameConn.gameId)
+	gameConn.counter = _map.Counter
+	seed, err := generators.GenerateSeed(_map.Init[:], []byte(_map.Secret), uint64(_map.Counter))
 	perm := make([]int, 256)
 	for i, el := range seed {
 		perm[i] = int(el)
@@ -106,7 +109,7 @@ func (gameConn GameConn) handleEndGame() {
 	if gameConn.level.Status() == game.STATUS_LOSE {
 		strStatus = "lose"
 	}
-	_ = gameConn.conn.WriteJSON(EndGameAnsw{Permutation: gameConn.perm, Counter: 0, GameResult: strStatus})
+	_ = gameConn.conn.WriteJSON(EndGameAnsw{Permutation: gameConn.perm, Counter: gameConn.counter, GameResult: strStatus})
 }
 
 func (gameConn *GameConn) handleGame(msg MoveMsg) MoveAnsw {
