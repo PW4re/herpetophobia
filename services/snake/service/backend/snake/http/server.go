@@ -10,16 +10,6 @@ import (
 	"snake/objects"
 )
 
-type Map struct {
-	Secret string    `json:"secret"`
-	Init   [256]byte `json:"init"`
-	Flag   string    `json:"flag"`
-}
-
-type Ids struct {
-	Ids []int `json:"ids"`
-}
-
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -33,7 +23,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method)
 	if r.Method == http.MethodPost {
 		log.Println("Handling create")
-		var _map Map
+		var _map objects.Map
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&_map)
 		if err != nil {

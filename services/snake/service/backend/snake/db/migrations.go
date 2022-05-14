@@ -12,14 +12,15 @@ var DbName = os.Getenv("dbName")
 var ColName = os.Getenv("collectionName")
 
 func Migrate() {
-	//TODO: get from env
+	if DbName == "" || ColName == "" {
+		log.Fatal("Service need specified 'dbName' and 'collectionName")
+	}
 	err := createCollection(DbName, ColName)
 	if err != nil {
-		_, ok := err.(mongo.CommandError)
-		log.Println(err.Error())
-		if ok {
-			log.Printf("Database '%s' and collection '%s' already exists", "local", "test")
-		} else {
+		switch err.(type) {
+		case mongo.CommandError:
+			log.Printf("Database '%s' and collection '%s' already exists", DbName, ColName)
+		default:
 			log.Fatal(err)
 		}
 	}

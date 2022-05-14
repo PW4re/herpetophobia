@@ -2,8 +2,8 @@ package generators
 
 import (
 	"encoding/binary"
-	"snake/abstract"
 	"snake/game"
+	"snake/game/abstract"
 	"snake/math"
 
 	"github.com/pkg/errors"

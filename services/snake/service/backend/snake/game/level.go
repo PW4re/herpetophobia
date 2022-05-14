@@ -2,7 +2,7 @@ package game
 
 import (
 	"fmt"
-	"snake/abstract"
+	"snake/game/abstract"
 	"strings"
 
 	"github.com/pkg/errors"

@@ -1,7 +1,7 @@
 package game
 
 import (
-	"snake/abstract"
+	"snake/game/abstract"
 
 	"github.com/pkg/errors"
 )

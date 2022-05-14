@@ -4,7 +4,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"snake/db"
-	"snake/http"
 	"snake/objects"
 )
 
@@ -25,7 +24,7 @@ func IncCounter(level objects.Level) {
 	_, _ = db.UpdateDoc(db.DbName, db.ColName, filter, update)
 }
 
-func ListId(limit int64, offset int64) http.Ids {
+func ListId(limit int64, offset int64) objects.Ids {
 	opts := options.Find().SetProjection(bson.D{{"id", 1}}).SetLimit(limit)
 	results, _ := db.GetResList(db.DbName, db.ColName, bson.D{}, opts)
 	var listId []int
@@ -33,5 +32,5 @@ func ListId(limit int64, offset int64) http.Ids {
 		mRes := result.Map()
 		listId = append(listId, mRes["id"].(int))
 	}
-	return http.Ids{Ids: listId}
+	return objects.Ids{Ids: listId}
 }
