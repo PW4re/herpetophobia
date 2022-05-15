@@ -7,7 +7,7 @@ import (
 	"snake/objects"
 )
 
-func GetMap(id int) objects.Level {
+func GetMap(id string) objects.Level {
 	res := db.Get(db.DbName, db.ColName, bson.M{"id": id})
 	var level objects.Level
 	_ = res.Decode(&level)
@@ -18,19 +18,22 @@ func SaveMap(level objects.Level) {
 	_, _ = db.InsertDoc(db.DbName, db.ColName, level)
 }
 
-func IncCounter(level objects.Level) {
-	filter := bson.D{{"id", level.Id}}
+func IncCounter(id string) {
+	filter := bson.D{{"id", id}}
 	update := bson.D{{"$inc", bson.D{{"counter", 1}}}}
 	_, _ = db.UpdateDoc(db.DbName, db.ColName, filter, update)
 }
 
 func ListId(limit int64, offset int64) objects.Ids {
-	opts := options.Find().SetProjection(bson.D{{"id", 1}}).SetLimit(limit)
-	results, _ := db.List("snake", "level", bson.D{}, opts)
-	var listId []int
+	if limit >= 10 {
+		limit = 10
+	}
+	opts := options.Find().SetProjection(bson.D{{"id", 1}}).SetLimit(limit).SetSkip(offset)
+	results, _ := db.List(db.DbName, db.ColName, bson.D{}, opts)
+	var listId []string
 	for _, result := range results {
 		mRes := result.Map()
-		listId = append(listId, mRes["id"].(int))
+		listId = append(listId, mRes["id"].(string))
 	}
 	return objects.Ids{Ids: listId}
 }

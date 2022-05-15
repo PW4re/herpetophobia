@@ -16,7 +16,7 @@ func List(dbName string, collectionName string, f bson.D, opts ...*options.FindO
 	ctx := context.TODO()
 	cur, err := getCollection(dbName, collectionName).Find(ctx, f, opts...)
 	var results []bson.D
-	err = cur.All(ctx, results)
+	err = cur.All(ctx, &results)
 	return results, err
 }
 
