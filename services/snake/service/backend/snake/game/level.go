@@ -1,7 +1,9 @@
 package game
 
 import (
-	"snake/abstract"
+	"fmt"
+	"snake/game/abstract"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -16,6 +18,7 @@ type Level struct {
 	Snake     *Snake
 	MaxSteps  int64
 	FoodSteps int64
+	FoodTTl   int64
 }
 
 func (level *Level) Status() Status {
@@ -85,10 +88,90 @@ func (level *Level) Step(direction Direction) error {
 
 	level.steps += 1
 
-	if level.steps > level.MaxSteps {
+	if level.steps > level.MaxSteps || level.FoodSteps+level.FoodTTl <= level.steps {
 		level.status = STATUS_LOSE
 		return nil
 	}
 
 	return nil
+}
+
+func (level *Level) Str() string {
+	var lines [][]string
+
+	for y := int64(0); y < level.Field.Height(); y++ {
+		var line []string
+
+		for x := int64(0); x < level.Field.Width(); x++ {
+			cell, _ := level.Field.Get(x, y)
+
+			switch cell {
+			case CELL_EMPTY:
+				line = append(line, ".")
+				break
+			case CELL_FOOD:
+				line = append(line, "*")
+				break
+			}
+		}
+
+		lines = append(lines, line)
+	}
+
+	for _, coordinates := range level.Snake.Body() {
+		if level.Field.Has(coordinates.X, coordinates.Y) {
+			lines[coordinates.Y][coordinates.X] = "#"
+		}
+	}
+
+	head, _ := level.Snake.Head()
+
+	if level.Field.Has(head.X, head.Y) {
+		lines[head.Y][head.X] = "@"
+	}
+	levelStr := fmt.Sprintf("steps: %d\n", level.steps)
+	for _, line := range lines {
+		levelStr += strings.Join(line, " ") + "\n"
+	}
+	return levelStr
+}
+
+func (level *Level) Map() [][]string {
+	var lines [][]string
+
+	for y := int64(0); y < level.Field.Height(); y++ {
+		var line []string
+
+		for x := int64(0); x < level.Field.Width(); x++ {
+			cell, _ := level.Field.Get(x, y)
+
+			switch cell {
+			case CELL_EMPTY:
+				line = append(line, ".")
+				break
+			case CELL_FOOD:
+				line = append(line, "*")
+				break
+			}
+		}
+
+		lines = append(lines, line)
+	}
+
+	for _, coordinates := range level.Snake.Body() {
+		if level.Field.Has(coordinates.X, coordinates.Y) {
+			lines[coordinates.Y][coordinates.X] = "#"
+		}
+	}
+
+	head, _ := level.Snake.Head()
+
+	if level.Field.Has(head.X, head.Y) {
+		lines[head.Y][head.X] = "@"
+	}
+	return lines
+}
+
+func (level Level) Steps() int64 {
+	return level.steps
 }
