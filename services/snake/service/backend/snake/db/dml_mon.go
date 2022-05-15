@@ -12,23 +12,12 @@ func Get(dbName string, collectionName string, f bson.M, opts ...*options.FindOn
 	return getCollection(dbName, collectionName).FindOne(context.TODO(), f, opts...)
 }
 
-func GetResList(dbName string, collectionName string, f bson.D, opts ...*options.FindOptions) ([]bson.D, error) {
-	client, disconnect, err := createClient()
-	ctx, cancel, err := connect(client, err)
-	if err != nil {
-		return nil, err
-	}
-	defer cancel()
-	defer disconnect(ctx)
-	cur, err := client.Database(dbName).Collection(collectionName).Find(ctx, f, opts...)
+func List(dbName string, collectionName string, f bson.D, opts ...*options.FindOptions) ([]bson.D, error) {
+	ctx := context.TODO()
+	cur, err := getCollection(dbName, collectionName).Find(ctx, f, opts...)
 	var results []bson.D
 	err = cur.All(ctx, results)
 	return results, err
-}
-
-func getCollection(dbName string, collectionName string) *mongo.Collection {
-	client := connhelper.GetClient()
-	return client.Database(dbName).Collection(collectionName)
 }
 
 func UpdateDocs(dbName string, collectionName string,
@@ -56,4 +45,9 @@ func DeleteDocs(dbName string, collectionName string, filter any, opts ...*optio
 func DeleteDoc(dbName string, collectionName string, filter any, opts ...*options.DeleteOptions) (bool, error) {
 	one, err := getCollection(dbName, collectionName).DeleteOne(context.TODO(), filter, opts...)
 	return one.DeletedCount == 1, err
+}
+
+func getCollection(dbName string, collectionName string) *mongo.Collection {
+	client := connhelper.GetClient()
+	return client.Database(dbName).Collection(collectionName)
 }

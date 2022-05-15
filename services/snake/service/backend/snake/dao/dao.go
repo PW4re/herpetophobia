@@ -8,9 +8,9 @@ import (
 )
 
 func GetMap(id int) objects.Level {
-	singleRes, _ := db.Get(db.DbName, db.ColName, bson.M{"id": id})
+	res := db.Get(db.DbName, db.ColName, bson.M{"id": id})
 	var level objects.Level
-	_ = singleRes.Decode(level)
+	_ = res.Decode(&level)
 	return level
 }
 
@@ -26,7 +26,7 @@ func IncCounter(level objects.Level) {
 
 func ListId(limit int64, offset int64) objects.Ids {
 	opts := options.Find().SetProjection(bson.D{{"id", 1}}).SetLimit(limit)
-	results, _ := db.GetResList(db.DbName, db.ColName, bson.D{}, opts)
+	results, _ := db.List("snake", "level", bson.D{}, opts)
 	var listId []int
 	for _, result := range results {
 		mRes := result.Map()
