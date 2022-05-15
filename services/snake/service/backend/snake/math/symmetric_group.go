@@ -6,8 +6,6 @@ type SymmetricGroup[T PermutationElement] struct {
 	length int
 }
 
-var _ Group = &SymmetricGroup[uint8]{}
-
 func NewSymmetricGroup[T PermutationElement](length int) *SymmetricGroup[T] {
 	return &SymmetricGroup[T]{
 		length: length,
