@@ -2,9 +2,9 @@ package http
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
-	"log"
 	"net/http"
 	"snake/dao"
 	"snake/objects"
@@ -15,14 +15,16 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+func getUuid() string {
+	return uuid.NewString()
+}
+
 func home(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("Hello"))
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method)
 	if r.Method == http.MethodPost {
-		log.Println("Handling create")
 		var _map objects.Map
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&_map)
@@ -30,25 +32,19 @@ func create(w http.ResponseWriter, r *http.Request) {
 			errorResp(w, 500, err)
 			return
 		}
-
-		if err != nil {
-			log.Fatalln(err)
-		}
-		if err != nil {
-			log.Fatalln(err)
-		}
+		gameId := getUuid()
 		dao.SaveMap(objects.Level{
-			Id:      0, //todo генерация id
+			Id:      gameId,
 			Secret:  _map.Secret,
 			Counter: 0,
 			Init:    _map.Init,
 			Flag:    _map.Flag,
 		})
-		log.Println("saved to db")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		resp := make(map[string]string)
 		resp["msg"] = "Created"
+		resp["id"] = gameId
 		jsonResp, _ := json.Marshal(resp)
 		_, _ = w.Write(jsonResp)
 		return
@@ -57,7 +53,22 @@ func create(w http.ResponseWriter, r *http.Request) {
 }
 
 func gameList(w http.ResponseWriter, r *http.Request) {
-	//todo отдать все id игр либо как-то батчевать их
+	if r.Method == http.MethodPost {
+		limOff := make(map[string]int64)
+		decoder := json.NewDecoder(r.Body)
+		err := decoder.Decode(&limOff)
+		if err != nil {
+			errorResp(w, 500, err)
+			return
+		}
+		listIds := dao.ListId(limOff["limit"], limOff["offset"])
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		jsonResp, _ := json.Marshal(listIds)
+		_, _ = w.Write(jsonResp)
+		return
+	}
+	errorResp(w, 405, errors.New("method not allowed"))
 }
 
 func play(w http.ResponseWriter, r *http.Request) {
@@ -66,17 +77,11 @@ func play(w http.ResponseWriter, r *http.Request) {
 		errorResp(w, 500, err)
 		return
 	}
-	msg := make(map[string]interface{})
-	_ = conn.ReadJSON(msg)
-	if msg["id"] != nil {
-		switch msg["id"].(type) {
-		case int:
-			gameConn := NewGameConn(conn, msg["id"].(int))
-			go gameConn.Play()
-		default:
-			errorResp(w, 401, errors.New("can't parse id"))
-			conn.Close()
-		}
+	msg := make(map[string]string)
+	_ = conn.ReadJSON(&msg)
+	if msg["id"] != "" {
+		gameConn := NewGameConn(conn, msg["id"])
+		go gameConn.Play()
 		return
 	}
 	errorResp(w, 401, errors.New("can't find id"))

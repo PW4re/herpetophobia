@@ -7,5 +7,5 @@ type Map struct {
 }
 
 type Ids struct {
-	Ids []int `json:"ids"`
+	Ids []string `json:"ids"`
 }
