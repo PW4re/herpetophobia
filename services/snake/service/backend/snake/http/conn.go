@@ -62,13 +62,16 @@ func (gameConn *GameConn) Play() {
 				Counter: gameConn.counter})
 
 		var moveMsg MoveMsg
-		for gameConn.level.Status() == game.STATUS_UNFINISHED {
+		for {
 			err = gameConn.conn.ReadJSON(&moveMsg)
 			if err != nil {
 				_ = gameConn.conn.WriteJSON(ErrAnsw{msg: err.Error()})
 				return
 			}
 			moveAnsw := gameConn.handleGame(moveMsg)
+			if gameConn.level.Status() != game.STATUS_UNFINISHED {
+				break
+			}
 			_ = gameConn.conn.WriteJSON(moveAnsw)
 			if moveMsg.CloseGame {
 				return
