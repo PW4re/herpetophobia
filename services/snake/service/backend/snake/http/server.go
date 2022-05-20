@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"snake/dao"
 	"snake/objects"
+	"time"
 )
 
 var upgrader = websocket.Upgrader{
@@ -34,11 +35,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 		}
 		gameId := getUuid()
 		dao.SaveMap(objects.Level{
-			Id:      gameId,
-			Secret:  _map.Secret,
-			Counter: 0,
-			Init:    _map.Init,
-			Flag:    _map.Flag,
+			Id:        gameId,
+			Secret:    _map.Secret,
+			Counter:   0,
+			Init:      _map.Init,
+			Flag:      _map.Flag,
+			CreatedAt: time.Now(),
 		})
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
