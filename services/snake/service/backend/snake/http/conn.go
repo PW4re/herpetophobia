@@ -31,6 +31,7 @@ type EndGameAnsw struct {
 type MoveAnsw struct {
 	GameMap [][]string `json:"gameMap"`
 	Steps   int64      `json:"step"`
+	Counter int        `json:"counter"`
 }
 
 type GameId struct {
@@ -54,7 +55,11 @@ func (gameConn *GameConn) Play() {
 			_ = gameConn.conn.WriteJSON(ErrAnsw{msg: err.Error()})
 			return
 		}
-		_ = gameConn.conn.WriteJSON(MoveAnsw{GameMap: gameConn.level.Map(), Steps: gameConn.level.Steps()})
+		_ = gameConn.conn.WriteJSON(
+			MoveAnsw{
+				GameMap: gameConn.level.Map(),
+				Steps:   gameConn.level.Steps(),
+				Counter: gameConn.counter})
 
 		var moveMsg MoveMsg
 		for gameConn.level.Status() == game.STATUS_UNFINISHED {
@@ -82,6 +87,7 @@ func (gameConn *GameConn) Play() {
 }
 
 func (gameConn *GameConn) setupGame() error {
+	dao.IncCounter(gameConn.gameId)
 	_map := dao.GetMap(gameConn.gameId)
 	gameConn.counter = _map.Counter
 	seed, err := generators.GenerateSeed(_map.Init[:], []byte(_map.Secret), uint64(_map.Counter))
@@ -103,7 +109,6 @@ func (gameConn *GameConn) setupGame() error {
 }
 
 func (gameConn GameConn) handleEndGame() {
-	dao.IncCounter(gameConn.gameId)
 	strStatus := "win"
 	if gameConn.level.Status() == game.STATUS_LOSE {
 		strStatus = "lose"
@@ -124,5 +129,5 @@ func (gameConn *GameConn) handleGame(msg MoveMsg) MoveAnsw {
 		direction = game.DIRECTION_RIGHT
 	}
 	_ = gameConn.level.Step(direction)
-	return MoveAnsw{GameMap: gameConn.level.Map(), Steps: gameConn.level.Steps()}
+	return MoveAnsw{GameMap: gameConn.level.Map(), Steps: gameConn.level.Steps(), Counter: gameConn.counter}
 }
