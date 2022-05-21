@@ -25,14 +25,6 @@ func getUuid() string {
 func playContent(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		id := strings.TrimPrefix(r.URL.Path, "/playGame/")
-		if strings.HasSuffix(id, "/webSock.js") {
-			client := &http.Client{
-				Transport: &http.Transport{Proxy: http.ProxyURL(r.URL)},
-			}
-			get, _ := client.Get(r.RequestURI)
-			get.Write(w)
-			return
-		}
 		if id == "" {
 			errorResp(w, 400, errors.New("Parameter 'id' is missing in url."))
 		}
