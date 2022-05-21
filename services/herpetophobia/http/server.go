@@ -3,12 +3,12 @@ package http
 import (
 	"encoding/json"
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"net/http"
 	"snake/dao"
 	"snake/objects"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -24,12 +24,19 @@ func getUuid() string {
 
 func playContent(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		vars := mux.Vars(r)
-		id, ok := vars["id"]
-		if !ok {
+		id := strings.TrimPrefix(r.URL.Path, "/playGame/")
+		if strings.HasSuffix(id, "/webSock.js") {
+			client := &http.Client{
+				Transport: &http.Transport{Proxy: http.ProxyURL(r.URL)},
+			}
+			get, _ := client.Get(r.RequestURI)
+			get.Write(w)
+			return
+		}
+		if id == "" {
 			errorResp(w, 400, errors.New("Parameter 'id' is missing in url."))
 		}
-		tmpl, _ := template.ParseFiles("./static/game.html")
+		tmpl, _ := template.ParseFiles("./static/websock.html")
 		tmpl.Execute(w, id)
 	}
 }
@@ -112,7 +119,7 @@ func errorResp(w http.ResponseWriter, code int, err error) {
 func StartServ() {
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
-	http.HandleFunc("/playGame/{id}", playContent)
+	http.HandleFunc("/playGame/", playContent)
 
 	http.HandleFunc("/create", create)
 	http.HandleFunc("/gameList", gameList)
