@@ -14,7 +14,7 @@ import random
 from math import gcd
 import  requests
 
-URL = "0.0.0.0:8080"
+URL = "0.0.0.0:5051"
 
 S = SymmetricGroup(_sage_const_256 )
 
@@ -407,7 +407,7 @@ async def sploit(id):
         res = exploit(counters_fields, resp["counter"])
         res = [x - _sage_const_1  for x in res]
         print("field for counter", resp["counter"], "is", res)
-        snake = Snake([(_sage_const_3 , _sage_const_1 ), (_sage_const_2 , _sage_const_1 ), (_sage_const_1 , _sage_const_1 ), (_sage_const_0 , _sage_const_1 )], Direction.RIGHT)
+        snake = Snake([(_sage_const_4 , _sage_const_1 ), (_sage_const_3 , _sage_const_1 ), (_sage_const_2 , _sage_const_1 ), (_sage_const_1 , _sage_const_1 )], Direction.RIGHT)
         directions = solve(res, snake)
 
         for direction in directions:
