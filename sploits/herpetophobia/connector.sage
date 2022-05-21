@@ -3,7 +3,6 @@ import websockets
 import json
 import random
 import asyncio
-from sploit import *
 from math import gcd
 
 URL = "0.0.0.0:8080"
