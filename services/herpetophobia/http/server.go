@@ -100,7 +100,9 @@ func errorResp(w http.ResponseWriter, code int, err error) {
 }
 
 func StartServ() {
-	http.HandleFunc("/", home)
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/", fs)
+	//http.HandleFunc("/", home)
 	http.HandleFunc("/create", create)
 	http.HandleFunc("/gameList", gameList)
 	http.HandleFunc("/play", play)
