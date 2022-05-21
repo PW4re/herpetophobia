@@ -8,7 +8,7 @@ import (
 )
 
 func GetMap(id string) objects.Level {
-	res := db.Get(db.DbName, db.ColName, bson.M{"id": id})
+	res := db.Get(db.DbName, db.ColName, bson.M{"_id": id})
 	var level objects.Level
 	_ = res.Decode(&level)
 	return level
@@ -19,7 +19,7 @@ func SaveMap(level objects.Level) {
 }
 
 func IncCounter(id string) {
-	filter := bson.D{{"id", id}}
+	filter := bson.D{{"_id", id}}
 	update := bson.D{{"$inc", bson.D{{"counter", 1}}}}
 	_, _ = db.UpdateDoc(db.DbName, db.ColName, filter, update)
 }
@@ -28,12 +28,12 @@ func ListId(limit int64, offset int64) objects.Ids {
 	if limit >= 10 {
 		limit = 10
 	}
-	opts := options.Find().SetProjection(bson.D{{"id", 1}}).SetLimit(limit).SetSkip(offset)
+	opts := options.Find().SetProjection(bson.D{{"_id", 1}}).SetLimit(limit).SetSkip(offset)
 	results, _ := db.List(db.DbName, db.ColName, bson.D{}, opts)
 	var listId []string
 	for _, result := range results {
 		mRes := result.Map()
-		listId = append(listId, mRes["id"].(string))
+		listId = append(listId, mRes["_id"].(string))
 	}
 	return objects.Ids{Ids: listId}
 }
