@@ -34,10 +34,6 @@ type MoveAnsw struct {
 	Counter int        `json:"counter"`
 }
 
-type GameId struct {
-	Id string `json:"id"`
-}
-
 type ErrAnsw struct {
 	msg string
 }
