@@ -6,6 +6,6 @@ COPY go.mod /app/
 COPY go.sum /app/
 RUN go mod download
 COPY Makefile /app/
-COPY . /app/
+COPY service/backend/herpetophobia /app/
 RUN go build -o srv
 CMD ["./srv"]
