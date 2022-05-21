@@ -3,11 +3,13 @@ package http
 import (
 	"encoding/json"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"net/http"
 	"snake/dao"
 	"snake/objects"
+	"text/template"
 	"time"
 )
 
@@ -20,8 +22,16 @@ func getUuid() string {
 	return uuid.NewString()
 }
 
-func home(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte("Hello"))
+func playContent(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		vars := mux.Vars(r)
+		id, ok := vars["id"]
+		if !ok {
+			errorResp(w, 400, errors.New("Parameter 'id' is missing in url."))
+		}
+		tmpl, _ := template.ParseFiles("./static/game.html")
+		tmpl.Execute(w, id)
+	}
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +110,10 @@ func errorResp(w http.ResponseWriter, code int, err error) {
 }
 
 func StartServ() {
-	http.HandleFunc("/", home)
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/", fs)
+	http.HandleFunc("/playGame/{id}", playContent)
+
 	http.HandleFunc("/create", create)
 	http.HandleFunc("/gameList", gameList)
 	http.HandleFunc("/play", play)
