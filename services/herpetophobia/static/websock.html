@@ -29,6 +29,13 @@
             margin-right: auto;
         }
 
+        .leftTop {
+            grid-row: 1;
+            grid-column: 1;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .center {
             border-style: solid;
             border-color: blue;
@@ -48,6 +55,7 @@
 </head>
 <body>
 <div class="wrapper">
+    <div class="leftTop" id="gameId">{{ .Id}}</div>
     <div class="centerTop" id="info"></div>
     <div class="center">
             <table class="gameTable">
@@ -342,6 +350,6 @@
             </table>
     </div>
 </div>
-<script src="js/webSock.js" defer></script>
+<script src="/js/webSock.js" defer></script>
 </body>
 </html>

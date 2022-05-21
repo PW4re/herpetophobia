@@ -1,6 +1,7 @@
 let sock = new WebSocket(`ws://${window.location.host}/play`);
+let _id = document.getElementById('gameId').innerText;
 sock.onopen = function (event) {
-    sock.send(JSON.stringify({"id": "1ed9b5d6-3a1b-402e-8db1-f4b8b253b2cf"}));
+    sock.send(JSON.stringify({"id": _id}));
     let msg = JSON.parse(event.data);
     if (msg.gameMap) {
         makeMap(msg.gameMap);

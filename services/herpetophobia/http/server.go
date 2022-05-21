@@ -5,9 +5,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
+	"html/template"
+	"log"
 	"net/http"
 	"snake/dao"
 	"snake/objects"
+	"strings"
 	"time"
 )
 
@@ -18,10 +21,6 @@ var upgrader = websocket.Upgrader{
 
 func getUuid() string {
 	return uuid.NewString()
-}
-
-func home(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte("Hello"))
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
@@ -99,10 +98,26 @@ func errorResp(w http.ResponseWriter, code int, err error) {
 	_, _ = w.Write(jsonResp)
 }
 
+type GameId struct {
+	Id string
+}
+
+func playContent(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		log.Println("started")
+		id := strings.TrimPrefix(r.URL.Path, "/playGame/")
+		if id == "" || strings.Contains(id, "/") {
+			errorResp(w, 400, errors.New("Parameter 'id' is missing in url."))
+		}
+		tmpl, _ := template.ParseFiles("./static/websock.html")
+		tmpl.Execute(w, GameId{Id: id})
+	}
+}
+
 func StartServ() {
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
-	//http.HandleFunc("/", home)
+	http.HandleFunc("/playGame/", playContent)
 	http.HandleFunc("/create", create)
 	http.HandleFunc("/gameList", gameList)
 	http.HandleFunc("/play", play)
