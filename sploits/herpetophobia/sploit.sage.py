@@ -428,8 +428,11 @@ async def sploit(id):
             })))
             resp = await ws.recv()
             print(direction)
-            print_map(json.loads(resp)["gameMap"])
-            print("=============================")
+            try:
+                print_map(json.loads(resp)["gameMap"])
+                print("=============================")
+            except Exception:
+                print(json.loads(resp))
         
         # while not resp.get("gameResult"):
         #         await ws.send(str(json.dumps({"direction": "w",
