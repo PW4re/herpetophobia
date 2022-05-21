@@ -88,7 +88,7 @@ def on_message(ws, message):
                     "closeGame": True,
                     "newGame": False}
         fields_counter = _sage_const_0 
-    if data.get("gameResult"):
+    elif data.get("gameResult"):
         fields_counter += _sage_const_1 
         counters_fields.append((data["counter"], data["permutation"]))
         send_data = {"direction": "w",
@@ -116,7 +116,7 @@ def on_close(ws, close_status_code, close_msg):
 def on_open(ws):
     global games
     global counter
-    ws.send(str(json.dumps({"id": games[_sage_const_0 ]})))
+    ws.send(str(json.dumps({"id": games[_sage_const_1 ]})))
     counter += _sage_const_1     
 
 
