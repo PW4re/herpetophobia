@@ -1,12 +1,12 @@
 import  itertools
 import collections
-from attr import field
 import websockets
 import json
 import asyncio
 import random
 from math import gcd
 import  requests
+import sys
 
 URL = "0.0.0.0:5051"
 
@@ -185,19 +185,22 @@ def solve(field: List[int], snake: Snake) -> List[Direction]:
 
     food = food
     food_visibility = food_visibility
-
     state: State = (snake, [], 0, 0)
+    while True:
+        try:
+            for target, visibility in zip(food, food_visibility):
+                for _ in range(1000):
+                    next_state = find_path(state, target, visibility, 1_000, 2)
 
-    for target, visibility in zip(food, food_visibility):
-        while True:
-            next_state = find_path(state, target, visibility, 1_000, 2)
-
-            if next_state is not None:
-                state = next_state
-                break
-
-    return state[1]
-    
+                    if next_state is not None:
+                        state = next_state
+                        break
+                else:
+                    raise Exception("tooo long")    
+            return state[1]
+        except Exception:
+            state: State = (snake, [], 0, 0)
+                
 
 
 def find_max_order(fields):
@@ -403,7 +406,7 @@ async def sploit(id):
         print("field for counter", resp["counter"], "is", res)
         snake = Snake([(4, 1), (3, 1), (2, 1), (1, 1)], Direction.RIGHT)
         directions = solve(res, snake)
-
+        print(len(directions))
         for direction in directions:
             if direction == Direction.UP:
                 move = "w"
@@ -437,4 +440,4 @@ async def sploit(id):
         # print(resp["permutation"])
 
 # websocket.enableTrace(True)
-asyncio.get_event_loop().run_until_complete(sploit(create_game()))
+asyncio.get_event_loop().run_until_complete(sploit(sys.argv[1]))
