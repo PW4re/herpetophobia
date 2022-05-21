@@ -90,7 +90,7 @@ func (level *Level) Step(direction Direction) error {
 
 	level.steps += 1
 
-	if level.steps > level.MaxSteps || (level.FoodSteps+level.FoodTTl)*level.FoodNum < level.steps {
+	if level.steps > level.MaxSteps || (level.FoodSteps*level.FoodNum+level.FoodTTl) < level.steps {
 		level.status = STATUS_LOSE
 		return nil
 	}
