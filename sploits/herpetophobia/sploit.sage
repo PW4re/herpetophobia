@@ -56,7 +56,7 @@ def get_fields_by_counter(sign, log, offset, max_order, secret, init, counter):
 
     return Permutation(init ^ (-1 * answer)), Permutation(init ^ answer)
 
-def exploit(data):
+def exploit(data, game_counter):
     counters = [counter for counter, _ in data]
     fields = [S(field) for _, field in data]
     
@@ -156,8 +156,8 @@ def exploit(data):
     else:
         raise Exception("No valid init")
 
-    next_field = get_fields_by_counter(sign, log, offset, max_order, secret, init, 100)
+    next_field = get_fields_by_counter(sign, log, offset, max_order, secret, init, game_counter)
     print(next_field[0])
 
-
-exploit(get_game_data())
+s
+exploit(get_game_data(), game_counter)

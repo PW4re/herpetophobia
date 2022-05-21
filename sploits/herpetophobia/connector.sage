@@ -45,8 +45,10 @@ def create_game():
     power = random.randint(1, order - 1)
     while gcd(order, power) != 1:
         power = random.randint(1, order - 1)
+    secret = str(random.randint(1000, 893329668))
+    print(secret)
     body = {
-        "secret": str(random.randint(1000, 893329668)),
+        "secret": secret,
         "init": exponentiation(init_perm, power),
         "flag": "FLAGGG" + str(random.randint(1, 10000))
     }
@@ -124,6 +126,7 @@ def sploit():
                                     on_close=on_close,
                                     on_open=on_open)
     ws.run_forever()
+    
     print(counters_fields)
 
 # websocket.enableTrace(True)
