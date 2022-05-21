@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
   srv:
-    build: service/backend/herpetophobia
+    build: ./
     image: snake:0.0.1
     ports:
       - "8080:8080"
